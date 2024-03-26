@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiple Choice Exam</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f3f3f3;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background: #2c3e50;
+            color: #fff;
+            padding: 1em;
+            text-align: center;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #question-display {
+            width: 80%;
+            background-color: #fff;
+            padding: 2em;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2em;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #2c3e50;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #1d2731;
+        }
+
+        footer {
+            background: #2c3e50;
+            color: #fff;
+            text-align: center;
+            padding: 1em;
+        }
+
+        .answered label {
+            color: #000; /* Change text color for answered questions */
+        }
+
+        .selected {
+    background-color: yellow; /* Change background color for selected option */
+}
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Multiple Choice Exam</h1>
+    </header>
+
+    <main>
+        <section id="question-display">
+            <!-- Questions and options will be dynamically generated here -->
+        </section>
+
+        <nav id="navigation">
+            <button id="prev-btn">Previous</button>
+            <button id="submit-btn">Submit</button>
+            <button id="next-btn">Next</button>
+        </nav>
+
+        <div id="timer">10:00</div>
+    </main>
+
+    <footer>
+        &copy; 2024 @OES. All rights reserved.
+    </footer>
+
+    <script>
+        const questions = [
+            {
+                question: "What is the capital of France?",
+                options: ["Paris", "London", "Berlin", "Rome"],
+                correctAnswer: "Paris",
+                answered: false
+            },
+            {
+                question: "Who painted the Mona Lisa?",
+                options: ["Leonardo da Vinci", "Pablo Picasso", "Vincent van Gogh", "Michelangelo"],
+                correctAnswer: "Leonardo da Vinci",
+                answered: false
+            },
+            // Add more questions here...
+        ];
+
+        let currentQuestionIndex;
+        let timerInterval;
+
+        function initializeExam() {
+            currentQuestionIndex = parseInt(sessionStorage.getItem('currentQuestionIndex')) || 0;
+            displayQuestion();
+            setupEventListeners();
+            startOrResumeTimer();
+        }
+
+        function displayQuestion() {
+            const questionDisplay = document.getElementById('question-display');
+            const currentQuestion = questions[currentQuestionIndex];
+            questionDisplay.innerHTML = `
+                <h2>${currentQuestion.question}</h2>
+                <ul>
+                    ${currentQuestion.options.map((option, index) => `
+                        <li>
+                            <input type="radio" id="option-${index}" name="answer" value="${option}" ${isQuestionAnswered(currentQuestion) ? 'disabled' : ''}>
+                            <label for="option-${index}" class="${isQuestionAnswered(currentQuestion) ? 'answered' : ''}">${option}</label>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+        }
+
+        function isQuestionAnswered(question) {
+            return question.answered || sessionStorage.getItem(`answered-${currentQuestionIndex}`) === 'true';
+        }
+
+        function startOrResumeTimer() {
+            if (!sessionStorage.getItem('visitedBefore')) {
+                startTimer(600); // Start from 10 minutes if not visited before
+                sessionStorage.setItem('visitedBefore', 'true');
+            } else {
+                const remainingSeconds = parseInt(sessionStorage.getItem('examTimer'), 10);
+                startTimer(remainingSeconds); // Resume from where it left off
+            }
+        }
+
+        function startTimer(startSeconds) {
+            let seconds = startSeconds;
+            timerInterval = setInterval(() => {
+                seconds--;
+                if (seconds < 0) {
+                    clearInterval(timerInterval);
+                    // Disable user interaction when the timer reaches 0
+                    disableUserInteraction();
+                    return;
+                }
+                sessionStorage.setItem('examTimer', seconds.toString());
+                updateTimerDisplay(seconds);
+            }, 1000);
+        }
+
+        function updateTimerDisplay(totalSeconds) {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            document.getElementById('timer').innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+
+        function setupEventListeners() {
+            document.getElementById('prev-btn').addEventListener('click', goToPreviousQuestion);
+            document.getElementById('next-btn').addEventListener('click', goToNextQuestion);
+            document.getElementById('submit-btn').addEventListener('click', submitExam);
+        }
+
+        function goToPreviousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                sessionStorage.setItem('currentQuestionIndex', currentQuestionIndex.toString());
+                displayQuestion();
+            }
+        }
+
+        function goToNextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                sessionStorage.setItem('currentQuestionIndex', currentQuestionIndex.toString());
+                displayQuestion();
+            }
+        }
+
+        function submitExam() {
+    const selectedOption = document.querySelector(`input[name="answer"]:checked`);
+    
+    if (selectedOption) {
+        const selectedLabel = selectedOption.nextElementSibling;
+        selectedLabel.classList.add('selected');
+    }
+    
+    const currentQuestion = questions[currentQuestionIndex];
+    currentQuestion.answered = true;
+    sessionStorage.setItem(`answered-${currentQuestionIndex}`, 'true');
+    displayQuestion();
+    // Calculate score and provide feedback
+}
+
+
+        function disableUserInteraction() {
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                button.disabled = true;
+            });
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.disabled = true;
+            });
+        }
+
+        initializeExam();
+    </script>
+</body>
+</html>
