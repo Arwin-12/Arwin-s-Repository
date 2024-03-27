@@ -76,25 +76,20 @@
         }
 
         section {
-             padding: 2em;
-             text-align: center;
-             margin-top: 120px; /* Keep the original margin-top */
-             color: #fff; /* Set the text color to white */
-             padding-bottom: calc(50px + 1em); /* Adjust the padding-bottom to accommodate the footer */
-       }
+            padding: 2em;
+            text-align: center;
+            margin-top: 120px; /* Keep the original margin-top */
+            color: #fff; /* Set the text color to white */
+            padding-bottom: calc(50px + 1em); /* Adjust the padding-bottom to accommodate the footer */
+        }
 
-
-
-        footer {
+       footer {
             background: linear-gradient(90deg, #2c3e50, #34495e);
             color: #fff;
             text-align: center;
             padding: 1em;
-            position: fixed;
-            bottom: 0;
             width: 100%;
-            z-index: 2;
-            /* Ensure footer does not overlap content */
+            box-sizing: border-box;
         }
 
         .dropdown {
@@ -270,7 +265,7 @@
             /* Darker shade for hover effect */
         }
 
-        .feature p {
+    .feature p {
         font-size: 18px;
         line-height: 1.6;
         padding: 20px;
@@ -287,6 +282,21 @@
         transform: translateY(-3px); /* Add slight upward movement on hover */
         border-color: #ff8a00; /* Change border color on hover */
     }
+
+    .footer-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .center-button {
+        margin-bottom: 5px; /* Add margin to create space between button and footer */
+    }
+    
     </style>
 </head>
 
@@ -332,14 +342,17 @@
             <img src="accessibility2.jpg" alt="Feature 5">
             <p>Accessibility and flexibility for remote assessments. Take exams from anywhere, anytime with our user-friendly interface and remote proctoring capabilities, ensuring equal opportunities for all.</p>
         </div>
-        <div class="center-button">
-            <!-- Add an ID to the button for easier targeting -->
-            <button id="getStartedBtn">Get Started</button>
+        <div class="footer-container">
+            <div class="center-button">
+                <!-- Add an ID to the button for easier targeting -->
+                <button id="getStartedBtn">Get Started</button>
+            </div>
+            <footer>
+            &copy; 2024 @OES. All rights reserved.
+            </footer>
         </div>
     </section>
-    <footer>
-        &copy; 2024 @OES. All rights reserved.
-    </footer>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // Function to add animation class to all features
