@@ -73,11 +73,6 @@
         .answered label {
             color: #000; /* Change text color for answered questions */
         }
-
-        .selected {
-    background-color: yellow; /* Change background color for selected option */
-}
-
     </style>
 </head>
 <body>
@@ -94,6 +89,7 @@
             <button id="prev-btn">Previous</button>
             <button id="submit-btn">Submit</button>
             <button id="next-btn">Next</button>
+            <button id="finish-btn" style="display: none;">Finish Exam</button> <!-- Finish Exam button initially hidden -->
         </nav>
 
         <div id="timer">10:00</div>
@@ -133,13 +129,23 @@
         function displayQuestion() {
             const questionDisplay = document.getElementById('question-display');
             const currentQuestion = questions[currentQuestionIndex];
+            const selectedOption = sessionStorage.getItem(`selectedOption-${currentQuestionIndex}`);
+            const finishButton = document.getElementById('finish-btn'); // Get the Finish Exam button element
+            
+            // Check if it's the last question to display the Finish Exam button
+            if (currentQuestionIndex === questions.length - 1) {
+                finishButton.style.display = 'inline-block'; // Display the button
+            } else {
+                finishButton.style.display = 'none'; // Hide the button if it's not the last question
+            }
+            
             questionDisplay.innerHTML = `
                 <h2>${currentQuestion.question}</h2>
                 <ul>
                     ${currentQuestion.options.map((option, index) => `
                         <li>
-                            <input type="radio" id="option-${index}" name="answer" value="${option}" ${isQuestionAnswered(currentQuestion) ? 'disabled' : ''}>
-                            <label for="option-${index}" class="${isQuestionAnswered(currentQuestion) ? 'answered' : ''}">${option}</label>
+                            <input type="radio" id="option-${index}" name="answer" value="${option}" ${isQuestionAnswered(currentQuestion) ? 'disabled' : ''} ${selectedOption === option ? 'checked' : ''}>
+                            <label for="option-${index}" class="${isQuestionAnswered(currentQuestion) ? 'answered' : ''} ${selectedOption === option ? 'selected' : ''}">${option}</label>
                         </li>
                     `).join('')}
                 </ul>
@@ -160,7 +166,8 @@
             }
         }
 
-        function startTimer(startSeconds) {
+        function startTimer(startSeconds)
+        {
             let seconds = startSeconds;
             timerInterval = setInterval(() => {
                 seconds--;
@@ -168,6 +175,7 @@
                     clearInterval(timerInterval);
                     // Disable user interaction when the timer reaches 0
                     disableUserInteraction();
+                    enableFinishButton(); // Enable Finish Exam button
                     return;
                 }
                 sessionStorage.setItem('examTimer', seconds.toString());
@@ -185,6 +193,7 @@
             document.getElementById('prev-btn').addEventListener('click', goToPreviousQuestion);
             document.getElementById('next-btn').addEventListener('click', goToNextQuestion);
             document.getElementById('submit-btn').addEventListener('click', submitExam);
+            document.getElementById('finish-btn').addEventListener('click', finishExam);
         }
 
         function goToPreviousQuestion() {
@@ -204,20 +213,37 @@
         }
 
         function submitExam() {
-    const selectedOption = document.querySelector(`input[name="answer"]:checked`);
-    
-    if (selectedOption) {
-        const selectedLabel = selectedOption.nextElementSibling;
-        selectedLabel.classList.add('selected');
-    }
-    
-    const currentQuestion = questions[currentQuestionIndex];
-    currentQuestion.answered = true;
-    sessionStorage.setItem(`answered-${currentQuestionIndex}`, 'true');
-    displayQuestion();
-    // Calculate score and provide feedback
-}
+            const currentQuestion = questions[currentQuestionIndex];
+            currentQuestion.answered = true;
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            if (!selectedOption) {
+                alert("Please select an option before submitting.");
+                return;
+            }
+            const selectedValue = selectedOption.value;
+            sessionStorage.setItem(`selectedOption-${currentQuestionIndex}`, selectedValue);
+            sessionStorage.setItem(`answered-${currentQuestionIndex}`, 'true');
+            disableRadioButtons(); // Disable radio buttons after submission
+            displayQuestion();
+            // Calculate score and provide feedback if needed
+        }
 
+        function finishExam() {
+            // Redirect the user to the homepage.html
+            window.location.href = "getstarted.html";
+        }
+
+        function disableRadioButtons() {
+            const radioButtons = document.querySelectorAll('input[type="radio"]');
+            radioButtons.forEach(radioButton => {
+                radioButton.disabled = true;
+            });
+        }
+
+        function enableFinishButton() {
+            const finishButton = document.getElementById('finish-btn');
+            finishButton.disabled = false;
+        }
 
         function disableUserInteraction() {
             const buttons = document.querySelectorAll('button');
