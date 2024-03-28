@@ -76,10 +76,10 @@
         }
 
         #timer {
-            position: relative;
-            margin-top: 20px; /* Add space between timer and footer */
-            text-align: center; /* Center the timer horizontally */
-        }
+    position: relative;
+    margin-top: 20px; /* Add space between timer and footer */
+    text-align: center; /* Center the timer horizontally */
+}
 
     </style>
 </head>
@@ -121,6 +121,18 @@
                 correctAnswer: "Leonardo da Vinci",
                 answered: false
             },
+            {
+                question: "What is the capital of France?",
+                options: ["Paris", "London", "Berlin", "Rome"],
+                correctAnswer: "Paris",
+                answered: false
+            },
+            {
+                question: "Who painted the Mona Lisa?",
+                options: ["Leonardo da Vinci", "Pablo Picasso", "Vincent van Gogh", "Michelangelo"],
+                correctAnswer: "Leonardo da Vinci",
+                answered: false
+            },
             // Add more questions here...
         ];
 
@@ -137,6 +149,10 @@
                 handleTimerExpiration();
             }
             enableRadioButtons();
+            const currentQuestion = questions[currentQuestionIndex];
+            if (isQuestionAnswered(currentQuestion)) {
+                disableRadioButtons();
+            }
         }
 
         function displayQuestion() {
@@ -168,11 +184,15 @@
         }
 
         function enableRadioButtons() {
-            const radioButtons = document.querySelectorAll('input[type="radio"]');
-            radioButtons.forEach(radioButton => {
+    const radioButtons = document.querySelectorAll('input[type="radio"]');
+    radioButtons.forEach(radioButton => {
+        const currentQuestion = questions[currentQuestionIndex];
+        if (!isQuestionAnswered(currentQuestion)) {
             radioButton.disabled = false;
-            });
         }
+    });
+}
+
 
         function isQuestionAnswered(question) {
             return question.answered || sessionStorage.getItem(`answered-${currentQuestionIndex}`) === 'true';
@@ -236,22 +256,25 @@
                 enableRadioButtons();
             }
         }
-
         function submitExam() {
             const currentQuestion = questions[currentQuestionIndex];
-            currentQuestion.answered = true;
             const selectedOption = document.querySelector('input[name="answer"]:checked');
             if (!selectedOption) {
-                alert("Please select an option before submitting.");
+                const confirmed = confirm("No option selected. Please select an option!!!");
+                if (!confirmed) {
                 return;
+                }
+            } else {
+                currentQuestion.answered = true;
+                const selectedValue = selectedOption.value;
+                sessionStorage.setItem(`selectedOption-${currentQuestionIndex}`, selectedValue);
+                sessionStorage.setItem(`answered-${currentQuestionIndex}`, 'true');
             }
-            const selectedValue = selectedOption.value;
-            sessionStorage.setItem(`selectedOption-${currentQuestionIndex}`, selectedValue);
-            sessionStorage.setItem(`answered-${currentQuestionIndex}`, 'true');
-            disableRadioButtons(); // Disable radio buttons after submission
-            displayQuestion();
-            // Calculate score and provide feedback if needed
+        disableRadioButtons(); // Disable radio buttons after checking if the question has been answered
+        displayQuestion();
+        // Calculate score and provide feedback if needed
         }
+
 
         function finishExam() {
             // Reset the timer and redirect the user to the homepage
